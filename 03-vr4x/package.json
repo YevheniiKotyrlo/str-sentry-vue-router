@@ -9,7 +9,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "@sentry/vue": "9.47.1",
+    "@sentry/vue": "10.40.0",
     "vue": "^3.5.0",
     "vue-router": "4.5.1"
   },

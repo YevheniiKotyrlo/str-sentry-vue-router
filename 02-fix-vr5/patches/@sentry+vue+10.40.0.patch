@@ -1,12 +1,12 @@
 diff --git a/node_modules/@sentry/vue/build/esm/router.js b/node_modules/@sentry/vue/build/esm/router.js
-index 1234567..abcdefg 100644
 --- a/node_modules/@sentry/vue/build/esm/router.js
 +++ b/node_modules/@sentry/vue/build/esm/router.js
-@@ -15,10 +15,11 @@ function instrumentVueRouter(
+@@ -15,10 +15,12 @@ function instrumentVueRouter(
    startNavigationSpanFn,
  ) {
    let hasHandledFirstPageLoad = false;
 +  const isLegacyRouter = 'mode' in router;
++  console.log('[sentry-patch] isLegacyRouter:', isLegacyRouter);
 
    router.onError(error => captureException(error, { mechanism: { handled: false } }));
 
@@ -15,7 +15,7 @@ index 1234567..abcdefg 100644
      // We avoid trying to re-fetch the page load span when we know we already handled it the first time
      const activePageLoadSpan = !hasHandledFirstPageLoad ? getActivePageLoadSpan() : undefined;
 
-@@ -80,11 +81,9 @@ function instrumentVueRouter(
+@@ -80,11 +82,13 @@ function instrumentVueRouter(
        });
      }
 
@@ -24,9 +24,13 @@ index 1234567..abcdefg 100644
 -    // `next` needs to be called in Vue Router 3 so that the hook is resolved.
 -    if (next) {
 -      next();
++    console.log('[sentry-patch] beforeEach guard called for:', to.path, '| isLegacyRouter:', isLegacyRouter, '| rest args:', rest.length);
 +    if (isLegacyRouter) {
 +      const next = rest[0];
-+      if (typeof next === 'function') { next(); }
++      if (typeof next === 'function') {
++        console.log('[sentry-patch] calling next() for legacy router');
++        next();
++      }
      }
    });
  }

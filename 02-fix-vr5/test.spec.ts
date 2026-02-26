@@ -1,20 +1,36 @@
 import { test, expect } from '@playwright/test';
 
 test('Patched Sentry router guard does NOT trigger deprecation warning', async ({ page }) => {
-  const warnings: string[] = [];
+  const logs: string[] = [];
   page.on('console', (msg) => {
-    if (msg.type() === 'warning') warnings.push(msg.text());
+    logs.push(`[${msg.type()}] ${msg.text()}`);
   });
 
   await page.goto('http://localhost:5181/', { waitUntil: 'networkidle' });
   await expect(page.locator('h1')).toHaveText('Home');
-  warnings.length = 0;
+
+  // Patch should detect this is NOT a legacy router (VR5 has no 'mode' property)
+  const initLog = logs.find((l) => l.includes('[sentry-patch] isLegacyRouter:'));
+  console.log('Init log:', initLog);
+  expect(initLog).toContain('isLegacyRouter: false');
+
+  logs.length = 0;
 
   await page.click('a[href="/about"]');
   await expect(page.locator('h1')).toHaveText('About');
   await page.waitForTimeout(500);
 
-  const deprecation = warnings.filter((w) => w.includes('next()') && w.includes('deprecated'));
-  console.log('Warnings:', deprecation);
-  expect(deprecation.length).toBe(0);
+  // Guard should fire but NOT call next()
+  const guardLog = logs.find((l) => l.includes('[sentry-patch] beforeEach guard called'));
+  console.log('Guard log:', guardLog);
+  expect(guardLog).toBeTruthy();
+
+  const nextLog = logs.find((l) => l.includes('[sentry-patch] calling next()'));
+  console.log('Next log:', nextLog);
+  expect(nextLog).toBeUndefined();
+
+  // No deprecation warnings
+  const deprecation = logs.filter((l) => l.includes('next()') && l.includes('deprecated'));
+  console.log('Deprecation warnings:', deprecation);
+  expect(deprecation).toHaveLength(0);
 });
