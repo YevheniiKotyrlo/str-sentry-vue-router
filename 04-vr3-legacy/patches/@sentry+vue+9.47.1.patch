@@ -1,0 +1,32 @@
+diff --git a/node_modules/@sentry/vue/build/esm/router.js b/node_modules/@sentry/vue/build/esm/router.js
+index 1234567..abcdefg 100644
+--- a/node_modules/@sentry/vue/build/esm/router.js
++++ b/node_modules/@sentry/vue/build/esm/router.js
+@@ -15,10 +15,11 @@ function instrumentVueRouter(
+   startNavigationSpanFn,
+ ) {
+   let hasHandledFirstPageLoad = false;
++  const isLegacyRouter = 'mode' in router;
+
+   router.onError(error => captureException(error, { mechanism: { handled: false } }));
+
+-  router.beforeEach((to, _from, next) => {
++  router.beforeEach((to, _from, ...rest) => {
+     // We avoid trying to re-fetch the page load span when we know we already handled it the first time
+     const activePageLoadSpan = !hasHandledFirstPageLoad ? getActivePageLoadSpan() : undefined;
+
+@@ -80,11 +81,9 @@ function instrumentVueRouter(
+       });
+     }
+
+-    // Vue Router 4 no longer exposes the `next` function, so we need to
+-    // check if it's available before calling it.
+-    // `next` needs to be called in Vue Router 3 so that the hook is resolved.
+-    if (next) {
+-      next();
++    if (isLegacyRouter) {
++      const next = rest[0];
++      if (typeof next === 'function') { next(); }
+     }
+   });
+ }

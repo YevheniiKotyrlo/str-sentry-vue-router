@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
+import * as Sentry from '@sentry/vue';
 import App from './App.vue';
-import { instrumentVueRouter, getInstrumentLog } from './instrument-patched';
 
 Vue.use(VueRouter);
 
@@ -22,11 +22,12 @@ const router = new VueRouter({
 console.log(`[main] Router mode: ${router.mode}`);
 console.log(`[main] 'mode' in router: ${'mode' in router}`);
 
-// Apply the patched instrumentation (same logic as PR #19476)
-instrumentVueRouter(router as any);
-
-// Expose for Playwright assertions
-(window as any).__instrumentLog = getInstrumentLog;
+Sentry.init({
+  Vue,
+  dsn: 'https://examplePublicKey@o0.ingest.sentry.io/0',
+  integrations: [Sentry.browserTracingIntegration({ router: router as any })],
+  tracesSampleRate: 1.0,
+});
 
 new Vue({
   router,
