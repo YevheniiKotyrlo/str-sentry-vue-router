@@ -2,3 +2,5 @@ node_modules
 dist
 test-results
 *.local
+.idea
+commit-msg.txt
