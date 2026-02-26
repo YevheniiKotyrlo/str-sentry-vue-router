@@ -10,7 +10,7 @@ test('Vue Router 4.5.x with patched Sentry does NOT show deprecation warning', a
   await expect(page.locator('h1')).toHaveText('Home');
 
   // Patch should detect this is NOT a legacy router (VR4 has no 'mode' property)
-  const initLog = logs.find((l) => l.includes('[sentry-patch] isLegacyRouter:'));
+  const initLog = logs.find((l) => l.includes('[sentry] isLegacyRouter:'));
   console.log('Init log:', initLog);
   expect(initLog).toContain('isLegacyRouter: false');
 
@@ -21,11 +21,11 @@ test('Vue Router 4.5.x with patched Sentry does NOT show deprecation warning', a
   await page.waitForTimeout(500);
 
   // Guard should fire but NOT call next()
-  const guardLog = logs.find((l) => l.includes('[sentry-patch] beforeEach guard called'));
+  const guardLog = logs.find((l) => l.includes('[sentry] beforeEach guard called'));
   console.log('Guard log:', guardLog);
   expect(guardLog).toBeTruthy();
 
-  const nextLog = logs.find((l) => l.includes('[sentry-patch] calling next()'));
+  const nextLog = logs.find((l) => l.includes('[sentry] calling next()'));
   console.log('Next log:', nextLog);
   expect(nextLog).toBeUndefined();
 

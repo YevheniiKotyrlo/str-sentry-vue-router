@@ -12,7 +12,7 @@ test('Vue Router 3 with patched @sentry/vue: next() is called, navigation works'
   await expect(page.locator('h1')).toHaveText('Home');
 
   // Patch should detect this IS a legacy router (VR3 has 'mode' property)
-  const initLog = logs.find((l) => l.includes('[sentry-patch] isLegacyRouter:'));
+  const initLog = logs.find((l) => l.includes('[sentry] isLegacyRouter:'));
   console.log('Init log:', initLog);
   expect(initLog).toContain('isLegacyRouter: true');
 
@@ -23,11 +23,11 @@ test('Vue Router 3 with patched @sentry/vue: next() is called, navigation works'
   await expect(page.locator('h1')).toHaveText('About', { timeout: 3000 });
 
   // Guard should fire AND call next() for legacy router
-  const guardLog = logs.find((l) => l.includes('[sentry-patch] beforeEach guard called'));
+  const guardLog = logs.find((l) => l.includes('[sentry] beforeEach guard called'));
   console.log('Guard log:', guardLog);
   expect(guardLog).toBeTruthy();
 
-  const nextLog = logs.find((l) => l.includes('[sentry-patch] calling next()'));
+  const nextLog = logs.find((l) => l.includes('[sentry] calling next()'));
   console.log('Next log:', nextLog);
   expect(nextLog).toBeTruthy();
 
